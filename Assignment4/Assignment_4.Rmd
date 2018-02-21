@@ -1,0 +1,78 @@
+---
+title: "Assignment_4 -- Tidyverse skills -- 10.5"
+author: "Anthea Yichen Li"
+date: "February 20, 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tibble)
+library(ggplot2)
+library("tidyverse")
+```
+
+# Assignment 4 -- Tidyverse skills -- 10.5
+
+### 1. How can you tell if an object is a tibble? (Hint: try printing mtcars, which is a regular data frame).
+```{r q1, eval=FALSE}
+is_tibble(mtcars)
+class(mtcars)
+```
+
+
+###2. Compare and contrast the following operations on a data.frame and equivalent tibble. What is different? Why might the default data frame behaviors cause you frustration?
+
+```{r q2, eval=FALSE}
+When using dataframes, the df$x command would give the same result as df[,"xyz"] column. When the df[] command is applied to multiple columns, the result we get would be a data frame instead of two vectors. 
+```
+
+
+###3. If you have the name of a variable stored in an object, e.g. var <- "mpg", how can you extract the reference variable from a tibble?
+```{r q3, eval=FALSE}
+"df[[var]]"
+```
+
+### 4. Practice referring to non-syntactic names in the following data frame by:
+
+```{r}
+something <- tibble(
+  `1` = 1:5,
+  `2` = `1` * 2 + rnorm(length(`1`))
+)
+```
+  1. extracting the variable called 1
+```{r}
+something[["1"]]
+```
+
+  2. Plotting a scatterplot of 1 vs 2.
+```{r}
+ggplot(something, aes(x = `1`, y = `2`)) + geom_point()
+```
+
+  3. Creating a new column `3` with is `2` divided by `1`:
+```{r}
+something[["3"]] <- something[["2"]] / something[["1"]]
+```
+
+  4. Renaming the columns to `one`, `two`, and `three`:
+```{r}
+something_great <- rename(something, one = `1`, two = `2`, three = `3`)
+something_great
+```
+
+###5. What does tibble::enframe() do? When might you use it?
+
+It converts named vectors to a data frame with names and values
+```{r q5, eval=FALSE}
+it is used to combine vectors to dataframe with col names 
+```
+
+###6. What option controls how many additional column names are printed at the footer of a tibble?
+
+The print function for tibbles is in `print.tbl_df`:
+```{r q6, eval=FALSE}
+print(.... , n_extra = ...)
+we can use n_extra in the tibble print function to control the number of columns printed.
+```
