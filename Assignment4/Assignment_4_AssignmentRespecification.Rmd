@@ -1,0 +1,80 @@
+---
+title: "Assignment_4_AssignmentRespecification"
+author: "Anthea Yichen Li"
+date: "March 01"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tibble)
+library(ggplot2)
+library("tidyverse")
+```
+
+# Assignment 4 -- Tidyverse skills -- 10.5
+
+###5. What does tibble::enframe() do? When might you use it?
+
+It converts named vectors to a data frame with names and values
+```{r}
+?tibble::enframe
+enframe(c(a = 1, b = 2, c = 3))
+```
+
+```{q5, eval=FALSE}
+it is used to combine vectors to dataframe with col names 
+```
+
+# Assignment 4 -- CASE STUDY -- 12.6.1
+```{r setup2, include=FALSE}
+#knitr::opts_chunk$set(echo = TRUE)
+library(tibble)
+library(ggplot2)
+library("tidyverse")
+
+who <- tidyr::who
+who1 <- who %>% 
+  gather(new_sp_m014:newrel_f65, key = "key", value = "cases", na.rm = TRUE)
+who1 %>% 
+  count(key)
+who2 <- who1 %>% 
+  mutate(key = stringr::str_replace(key, "newrel", "new_rel"))
+who3 <- who2 %>% 
+  separate(key, c("new", "type", "sexage"), sep = "_")
+who3 %>% 
+  count(new)
+who4 <- who3 %>% 
+  select(-new, -iso2, -iso3)
+who5 <- who4 %>% 
+  separate(sexage, c("sex", "age"), sep = 1)
+who %>%
+  gather(code, value, new_sp_m014:newrel_f65, na.rm = TRUE) %>% 
+  mutate(code = stringr::str_replace(code, "newrel", "new_rel")) %>%
+  separate(code, c("new", "var", "sexage")) %>% 
+  select(-new, -iso2, -iso3) %>% 
+  separate(sexage, c("sex", "age"), sep = 1)
+```
+
+
+###3. I claimed that iso2 and iso3 were redundant with country. Confirm this claim.
+
+```{r}
+select(who3, country, iso2, iso3) %>%
+  distinct() %>%
+  group_by(country) %>%
+  filter(n() > 1)
+```
+
+
+###4. For each country, year, and sex compute the total number of cases of TB. Make an informative visualization of the data.
+
+```{r}
+who5 %>%
+  group_by(country, year, sex) %>%
+  filter(year > 1995) %>%
+  summarise(cases = sum(cases)) %>%
+  unite(country_sex, country, sex, remove = FALSE) %>%
+  ggplot(aes(x = year, y = cases, group = country_sex, color=sex)) +
+  geom_line()
+```
