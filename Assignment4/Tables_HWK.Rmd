@@ -15,6 +15,7 @@ library(foreign)
 library(tidyverse)
 library(stringr)
 library(plyr)
+
 library(reshape2)
 source("xtable.r")
 
@@ -83,6 +84,16 @@ raw <- arrange(raw, year, artist, track)
 long_name <- nchar(raw$track) > 20
 raw$track[long_name] <- paste0(substr(raw$track[long_name], 0, 20), "...")
 head(raw,10)
+
+raw$artist <- iconv(raw$artist, "MAC", "ASCII//translit")
+
+raw$track <- str_replace(raw$track, " \\(.*?\\)", "")
+names(raw)[-(1:5)] <- str_c("wk", 1:76)
+raw <- arrange(raw, year, artist, track)
+
+long_name <- nchar(raw$track) > 20
+raw$track[long_name] <- paste0(substr(raw$track[long_name], 0, 20), "...")
+head(raw,10)
 clean <- melt(raw, id = 1:5, na.rm = T)
 clean$week <- as.integer(str_replace_all(clean$variable, "[^0-9]+", ""))
 clean$variable <- NULL
@@ -90,11 +101,12 @@ clean$variable <- NULL
 clean$date.entered <- ymd(clean$date.entered)
 clean$date <- clean$date.entered + weeks(clean$week - 1)
 clean$date.entered <- NULL
-clean
-clean <- plyr::rename(clean,  c("value" = "rank"))
+clean <- rename(clean, c("value" = "rank"))
 clean <- arrange(clean, year, artist, track, time, week)
 clean <- clean[c("year", "artist", "time", "track", "date", "week", "rank")]
 
-clean_out <- mutate(clean, date = as.character(date))
+
+clean_out <- mutate(clean, 
+                    date = as.character(date))
 head(clean_out,10)
 ```
